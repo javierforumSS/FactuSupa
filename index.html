@@ -4,47 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FactuPro</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script type="module" src="config.js" defer></script>
-<script type="module" src="app.js" defer></script>
+<link rel="stylesheet" href="styles.css">
+
+<!-- Supabase JS global -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<!-- Config y App -->
+<script src="config.js"></script>
+<script src="app.js" defer></script>
 </head>
 <body>
+    <h1>FactuPro</h1>
 
-<div id="login-container">
-  <h1>Login</h1>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Contraseña">
-  <button id="btn-login">Entrar</button>
-  <button id="btn-signup">Crear cuenta</button>
-  <div id="login-error"></div>
-</div>
+    <div id="login">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="btnLogin">Entrar</button>
+        <button id="btnRegister">Registrarse</button>
+    </div>
 
-<div id="dashboard" style="display:none;">
-  <h1>Facturas</h1>
-  <button id="btn-logout">Cerrar sesión</button>
-  <button id="btn-new-invoice">Nueva Factura</button>
+    <div id="app" style="display:none;">
+        <h2>Bienvenido <span id="userName"></span></h2>
+        <button id="btnLogout">Cerrar sesión</button>
 
-  <div id="invoice-list"></div>
+        <h3>Crear Factura</h3>
+        <input type="text" id="client_name" placeholder="Nombre Cliente">
+        <input type="text" id="client_nif" placeholder="NIF Cliente">
+        <input type="text" id="client_address" placeholder="Dirección Cliente">
+        <input type="number" id="subtotal" placeholder="Subtotal">
+        <input type="number" id="iva" placeholder="IVA">
+        <input type="number" id="total" placeholder="Total">
+        <button id="btnSaveInvoice">Guardar Factura</button>
 
-  <div id="invoice-form" style="display:none;">
-    <h2>Factura</h2>
-    <input type="text" id="client_name" placeholder="Nombre cliente">
-    <input type="text" id="client_nif" placeholder="NIF">
-    <input type="text" id="client_address" placeholder="Dirección">
-    <input type="text" id="client_cp" placeholder="CP">
-    <input type="text" id="client_city" placeholder="Ciudad">
-    <input type="email" id="client_email" placeholder="Email">
-    <input type="date" id="invoice_date">
-    <input type="number" id="subtotal" placeholder="Subtotal">
-    <input type="number" id="iva" placeholder="IVA">
-    <input type="number" id="total" placeholder="Total">
-    <label><input type="checkbox" id="paid"> Pagada</label>
-    <textarea id="items" placeholder='Items (JSON)'></textarea>
-    <button id="btn-save-invoice">Guardar</button>
-    <button id="btn-cancel">Cancelar</button>
-  </div>
-</div>
-
+        <h3>Facturas</h3>
+        <ul id="invoiceList"></ul>
+    </div>
 </body>
 </html>
