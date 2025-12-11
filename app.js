@@ -32,7 +32,7 @@ btnLogin.addEventListener('click', async () => {
 
 // Register
 btnRegister.addEventListener('click', async () => {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUpWithPassword({
         email: emailInput.value,
         password: passwordInput.value
     });
