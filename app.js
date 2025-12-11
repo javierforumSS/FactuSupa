@@ -1,111 +1,94 @@
 // app.js
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Referencias HTML
+const loginDiv = document.getElementById('login');
+const appDiv = document.getElementById('app');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const btnLogin = document.getElementById('btnLogin');
+const btnRegister = document.getElementById('btnRegister');
+const btnLogout = document.getElementById('btnLogout');
 
-const userFields = ['name','nif','email','address','phone','iban'];
-const userInputs = {};
-userFields.forEach(f => userInputs[f] = document.getElementById(f));
+const userNameSpan = document.getElementById('userName');
+const invoiceList = document.getElementById('invoiceList');
+const btnSaveInvoice = document.getElementById('btnSaveInvoice');
 
-const saveUserBtn = document.getElementById('save-user');
-const invoicesTable = document.querySelector('#invoices-table tbody');
-const newInvoiceBtn = document.getElementById('new-invoice');
+// Inputs factura
+const client_name = document.getElementById('client_name');
+const client_nif = document.getElementById('client_nif');
+const client_address = document.getElementById('client_address');
+const subtotal = document.getElementById('subtotal');
+const iva = document.getElementById('iva');
+const total = document.getElementById('total');
 
-let userId = null;
+// Login
+btnLogin.addEventListener('click', async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: emailInput.value,
+        password: passwordInput.value
+    });
+    if (error) alert(error.message);
+});
 
-// --- FUNCIONES ---
-async function loadUser() {
-    const { data, error } = await supabase
-        .from('User')
-        .select('*')
-        .limit(1)
-        .single();
-    
-    if(error) { console.log(error); return; }
-    
-    if(data) {
-        userId = data.id;
-        userFields.forEach(f => userInputs[f].value = data[f] || '');
-    }
-}
+// Register
+btnRegister.addEventListener('click', async () => {
+    const { data, error } = await supabase.auth.signUp({
+        email: emailInput.value,
+        password: passwordInput.value
+    });
+    if (error) alert(error.message);
+    else alert('Registrado, revisa tu email para confirmar');
+});
 
-async function saveUser() {
-    const payload = {};
-    userFields.forEach(f => payload[f] = userInputs[f].value);
-    payload.createdAt = new Date().toISOString();
+// Logout
+btnLogout.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+});
 
-    if(userId) {
-        const { error } = await supabase
-            .from('User')
-            .update(payload)
-            .eq('id', userId);
-        if(error) console.log(error);
+// Detectar sesión
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) {
+        loginDiv.style.display = 'none';
+        appDiv.style.display = 'block';
+        userNameSpan.textContent = session.user.email;
+        loadInvoices();
     } else {
-        const { data, error } = await supabase
-            .from('User')
-            .insert([payload])
-            .select()
-            .single();
-        if(error) console.log(error);
-        else userId = data.id;
+        loginDiv.style.display = 'block';
+        appDiv.style.display = 'none';
     }
-    alert('Datos guardados');
-}
+});
 
+// Guardar factura
+btnSaveInvoice.addEventListener('click', async () => {
+    const { data, error } = await supabase.from('invoices').insert([{
+        invoice_number: 'TEMP-' + Date.now(),
+        client_name: client_name.value,
+        client_nif: client_nif.value,
+        client_address: client_address.value,
+        invoice_date: new Date().toISOString(),
+        subtotal: parseFloat(subtotal.value),
+        iva: parseFloat(iva.value),
+        total: parseFloat(total.value),
+        paid: false,
+        items: '[]',
+        createdAt: new Date().toISOString(),
+        user_id: supabase.auth.user().id
+    }]);
+    if (error) alert(error.message);
+    else loadInvoices();
+});
+
+// Cargar facturas
 async function loadInvoices() {
-    invoicesTable.innerHTML = '';
-    const { data, error } = await supabase
-        .from('Invoice')
+    const { data, error } = await supabase.from('invoices')
         .select('*')
+        .eq('user_id', supabase.auth.user().id)
         .order('createdAt', { ascending: false });
-    if(error) { console.log(error); return; }
+    if (error) alert(error.message);
+    invoiceList.innerHTML = '';
     data.forEach(inv => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${inv.invoice_number}</td>
-            <td>${inv.client_name}</td>
-            <td>${new Date(inv.invoice_date).toLocaleDateString()}</td>
-            <td>${inv.total}</td>
-            <td>
-                <button data-id="${inv.id}" class="delete">Borrar</button>
-            </td>
-        `;
-        invoicesTable.appendChild(tr);
+        const li = document.createElement('li');
+        li.textContent = `${inv.invoice_number} - ${inv.client_name} - ${inv.total}€`;
+        invoiceList.appendChild(li);
     });
 }
-
-// --- EVENTOS ---
-saveUserBtn.addEventListener('click', saveUser);
-
-newInvoiceBtn.addEventListener('click', async () => {
-    const invoice_number = prompt('Número de factura:');
-    const client_name = prompt('Nombre cliente:');
-    const subtotal = parseFloat(prompt('Subtotal:')) || 0;
-    const iva = parseFloat(prompt('IVA:')) || 0;
-    const total = subtotal + iva;
-    const invoice_date = new Date().toISOString();
-    const items = JSON.stringify([]);
-
-    const { error } = await supabase
-        .from('Invoice')
-        .insert([{ invoice_number, client_name, invoice_date, subtotal, iva, total, paid: false, items, createdAt: invoice_date }]);
-    if(error) { console.log(error); return; }
-    loadInvoices();
-});
-
-invoicesTable.addEventListener('click', async (e) => {
-    if(e.target.classList.contains('delete')) {
-        const id = e.target.dataset.id;
-        const { error } = await supabase
-            .from('Invoice')
-            .delete()
-            .eq('id', id);
-        if(error) console.log(error);
-        loadInvoices();
-    }
-});
-
-// --- INICIAL ---
-loadUser();
-loadInvoices();
