@@ -3,41 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FactuPro</title>
-<link rel="stylesheet" href="styles.css">
+<title>Facturas Supabase</title>
 </head>
 <body>
-    <h1>FactuPro</h1>
 
-    <div id="login">
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Contraseña">
-        <button id="btnLogin">Entrar</button>
-        <button id="btnRegister">Registrarse</button>
-    </div>
+<h1>Mi App de Facturas</h1>
 
-    <div id="app" style="display:none;">
-        <h2>Bienvenido <span id="userName"></span></h2>
-        <button id="btnLogout">Cerrar sesión</button>
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<button id="btnRegister">Registrar</button>
+<button id="btnLogin">Login</button>
 
-        <h3>Crear Factura</h3>
-        <input type="text" id="client_name" placeholder="Nombre Cliente">
-        <input type="text" id="client_nif" placeholder="NIF Cliente">
-        <input type="text" id="client_address" placeholder="Dirección Cliente">
-        <input type="number" id="subtotal" placeholder="Subtotal">
-        <input type="number" id="iva" placeholder="IVA">
-        <input type="number" id="total" placeholder="Total">
-        <button id="btnSaveInvoice">Guardar Factura</button>
+<!-- 1. Cargar Supabase desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
 
-        <h3>Facturas</h3>
-        <ul id="invoiceList"></ul>
-    </div>
-    <!-- Supabase JS global -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<!-- Config y App -->
+<!-- 2. Configuración de Supabase -->
 <script src="config.js"></script>
-<script src="app.js" defer></script>
-    
+
+<!-- 3. Lógica de app -->
+<script src="app.js"></script>
 </body>
 </html>
